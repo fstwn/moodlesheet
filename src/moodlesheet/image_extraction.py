@@ -105,7 +105,7 @@ def extract_images(inputdir, outputfile, placeholder,
     
     # create temporary directory
     tempdir = sanitize(os.path.join(inputdir,
-                                    "__tempcontactsheet"))
+                                    ".__tempcontactsheet"))
     os.makedirs(tempdir, exist_ok=True)
     # loop over all image sets and create contactsheet
     preprocessed_set = []

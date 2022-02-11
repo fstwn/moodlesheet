@@ -1,6 +1,7 @@
 # PYTHON STANDARD LIBRARY IMPORTS ---------------------------------------------
 
 import os
+import zipfile
 
 
 # LOCAL MODULE IMPORTS --------------------------------------------------------
@@ -24,10 +25,24 @@ PLACEHOLDER = sanitize(os.path.join(HERE, "resources/placeholder.jpg"))
 
 if __name__ == "__main__":
 
-    # get all portfolio directories inside input dir
-    portfolios = [os.path.join(INPUTDIR, d) for d in os.listdir(INPUTDIR)
-                  if os.path.isdir(os.path.join(INPUTDIR, d))]
-    
+    # gather contents, unzip files if necessary
+    contents = [os.path.join(INPUTDIR, d) for d in os.listdir(INPUTDIR)]
+    portfolios = []
+    for p in contents:
+        # check if path is a directory or file
+        if os.path.isdir(p):
+            # add as portfoli dir if a directory
+            portfolios.append(p)
+        # else check if it's a .zip archive and extract the contents
+        elif zipfile.is_zipfile(p):
+            exdir = p[:-4]
+            # only if folder with the same name does not exist yet
+            if not os.path.isdir(exdir):
+                os.makedirs(exdir)
+                with zipfile.ZipFile(p, "r") as zipobj:
+                    zipobj.extractall(exdir)
+            portfolios.append(exdir)
+
     # declare output directory
     OUTPUT_DIR = sanitize(os.path.join(HERE, "output"))
 
