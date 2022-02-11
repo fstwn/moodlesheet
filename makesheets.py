@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     # loop over all portfolios an extract images into contact sheet
     for p in portfolios:
-        fn = os.path.basename(os.path.normpath(p)) + "_avg.jpg"
+        fn = os.path.basename(os.path.normpath(p)) + ".jpg"
         outfile = os.path.join(OUTPUT_DIR, fn)
         
         # settings
