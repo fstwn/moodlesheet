@@ -50,9 +50,10 @@ if __name__ == "__main__":
     for p in portfolios:
         fn = os.path.basename(os.path.normpath(p)) + ".jpg"
         outfile = os.path.join(OUTPUT_DIR, fn)
+        
         # settings
         mode = "floor"
-        factor = 1
+        factor = 0.65
         width_margin = 10
         height_margin = 10
         background = "white"
