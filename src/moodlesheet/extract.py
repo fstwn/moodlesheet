@@ -75,7 +75,8 @@ def verify_img(filepath, placeholder):
 
 
 def extract_images(inputdir, outputfile, placeholder,
-                   mode="floor", factor=1, wm=0, hm=0, background="white"):
+                   mode="floor", factor=1, wm=0, hm=0, background="white",
+                   mpmax=30, quality=100, optimize=True):
     """
     Extracts image file paths from moodle portfolio export.
     """
@@ -133,8 +134,11 @@ def extract_images(inputdir, outputfile, placeholder,
                                             factor=factor,
                                             wm=wm,
                                             hm=hm,
-                                            background=background)
-    sheet.convert("RGB").save(sanitize(outputfile))
+                                            background=background,
+                                            mpmax=mpmax)
+    sheet.convert("RGB").save(sanitize(outputfile),
+                              quality=quality,
+                              optimize=optimize)
     shutil.rmtree(tempdir)
     log.info("Contact sheet successfully created!")
     return outputfile

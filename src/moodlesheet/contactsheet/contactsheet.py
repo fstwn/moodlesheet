@@ -20,7 +20,8 @@ from PIL import Image, ImageOps
 
 def create_tiled_image(image_paths, mode="original",
                        factor=0.0, wm=0, hm=0, center=True,
-                       background="black"):
+                       background="black",
+                       mpmax=30):
     """
     Create a tiled image from the list of image paths.
     """
@@ -45,7 +46,8 @@ def create_tiled_image(image_paths, mode="original",
                                                         image_size,
                                                         factor=factor,
                                                         wm=wm,
-                                                        hm=hm)
+                                                        hm=hm,
+                                                        mpmax=mpmax)
     
     final_image = Image.new("RGB", output_size, background)
 
@@ -95,7 +97,8 @@ def get_grid_size(cell_count):
     return cols, rows
 
 
-def get_tiled_image_dimensions(grid_size, image_size, factor=0.0, wm=0, hm=0):
+def get_tiled_image_dimensions(grid_size, image_size, factor=0.0, wm=0, hm=0,
+                               mpmax=30):
     """
     An image consisting of tiles of itself (or same-sized) images
     will be close to the same dimensions as the original.
@@ -109,18 +112,33 @@ def get_tiled_image_dimensions(grid_size, image_size, factor=0.0, wm=0, hm=0):
              output image/
     """
     if not factor:
-        tile_width = int(image_size[0] / grid_size[0]) + wm
+        tile_width = int(image_size[0] / grid_size[0])
         # preserve aspect ratio by dividing consistently.
         # grid cols is always >= rows
-        tile_height = int(image_size[1] / grid_size[0]) + hm
+        tile_height = int(image_size[1] / grid_size[0])
     else:
-        tile_width = int(image_size[0] * factor) + wm
-        tile_height = int(image_size[1] * factor) + hm
+        tile_width = int(image_size[0] * factor)
+        tile_height = int(image_size[1] * factor)
 
     # find the final width and height by multiplying up the tile size by the
     # number of rows / cols.
     final_width = (tile_width * grid_size[0]) + (wm * grid_size[0]) + wm
     final_height = (tile_height * grid_size[1]) + (wm * grid_size[1]) + hm
+
+    maxdim = math.floor(math.sqrt(mpmax * 1000000))
+    if final_width > maxdim or final_height > maxdim:
+        if final_width > final_height:
+            sf_w = (maxdim / final_width)
+            sf_h = (maxdim / final_width)
+        else:
+            sf_w = (maxdim / final_height)
+            sf_h = (maxdim / final_height)
+        # compute new tile width
+        tile_width = math.floor(tile_width * sf_w)
+        tile_height = math.floor(tile_height * sf_h)
+        # recompute final width
+        final_width = (tile_width * grid_size[0]) + (wm * grid_size[0]) + wm
+        final_height = (tile_height * grid_size[1]) + (wm * grid_size[1]) + hm
 
     return (tile_width, tile_height), (final_width, final_height)
 

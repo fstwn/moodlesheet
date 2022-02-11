@@ -48,19 +48,25 @@ if __name__ == "__main__":
 
     # loop over all portfolios an extract images into contact sheet
     for p in portfolios:
-        fn = os.path.basename(os.path.normpath(p)) + ".jpg"
+        fn = os.path.basename(os.path.normpath(p)) + "_avg.jpg"
         outfile = os.path.join(OUTPUT_DIR, fn)
         
         # settings
-        mode = "floor"
-        factor = 0.65
+        mode = "average"
+        factor = 1
         width_margin = 10
         height_margin = 10
         background = "white"
+        mpmax = 32
+        quality = 95
+        optimize = True
         
         extract_images(p, outfile, PLACEHOLDER,
                        mode=mode,
                        factor=factor,
                        wm=width_margin,
                        hm=height_margin,
-                       background=background)
+                       background=background,
+                       mpmax=mpmax,
+                       quality=quality,
+                       optimize=optimize)
