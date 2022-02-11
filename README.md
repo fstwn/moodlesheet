@@ -1,4 +1,4 @@
-# Compiling B322 moodle image galleries to contact sheet images
+# Compiling moodle portfolios to contact sheet images
 
 ## About
 
