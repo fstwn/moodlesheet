@@ -30,23 +30,40 @@ pip install -e .
 
 ## 3. Export the moodle gallery as a portfolio (HTML with attachments)
 
-Eport the moodle gallery as a portfolio (HTML with attachments). You should get
+Export the moodle gallery as a portfolio (HTML with attachments). You should get
 a `portfolio-export.zip` file. Rename this into something useful, .e.g.
 `b322_2021_aufgabe01.zip` and place it into the `input` directory. Your
 folder structure should then be something like this:
 
 ```
 moodlesheet/
-├─ input/
+├─ input_portfolio/
 │  ├─ b322_2021_aufgabe01.zip
 │  │  ├─ site_files
 │  │  ├─ Portfolio-full.html (or similar name)
 ```
 
 *NOTE: You don't need to unzip the file, a new folder with the same name and
-all contents will be created automatically inside `input/`.*
+all contents will be created automatically inside `input_portfolio/`.*
 
-## 4. Run the script
+## 4. Export moodle PDF hand-ins from tasks
+
+Export the moodle task hand-in PDFs. You should get a `.zip` file. Rename this
+into something useful, .e.g. `b322_2021_aufgabe08.zip` and place it into the
+`input_pdf` directory. Your folder structure should then be something like
+this:
+
+```
+moodlesheet/
+├─ input_pdf/
+│  ├─ b322_2021_aufgabe08.zip
+│  │  ├─ *many folders, one per student, each containing a pdf file*
+```
+
+*NOTE: You don't need to unzip the file, a new folder with the same name and
+all contents will be created automatically inside `input_pdf/`.*
+
+## 5. Run the script
 
 With the repository directory as current working directory, run
 ```
