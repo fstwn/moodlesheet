@@ -13,7 +13,10 @@ __pycache__/
 .coverage
 
 # MISC
-input/*/
+input_portfolio/*/
+input_portfolio/*.zip
+input_pdf/*/
+input_pdf/*.zip
 output/*.jpg
 _archive
 moodlesheet.code-workspace

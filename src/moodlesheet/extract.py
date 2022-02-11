@@ -1,6 +1,7 @@
 # PYTHON STANDARD LIBRARY IMPORTS ---------------------------------------------
 
 import glob
+import math
 import os
 import shutil
 import sys
@@ -9,6 +10,7 @@ import sys
 # THIRD PARTY MODULE IMPORTS --------------------------------------------------
 
 import bs4
+import pdf2image
 
 
 # LOCAL MODULE IMPORTS --------------------------------------------------------
@@ -62,13 +64,13 @@ def verify_img(filepath, placeholder):
     """
     if os.path.isfile(filepath):
         return filepath
-    
+
     if ".." in str(filepath):
         filepath = str(filepath).replace("..", ".")
-    
+
     if os.path.isfile(filepath):
         return sanitize(filepath)
-    
+
     log.warn(("Image file ...{0} not found! Inserting "
               "placeholder...").format(filepath[-45:]))
     return placeholder
@@ -78,7 +80,8 @@ def extract_images(inputdir, outputfile, placeholder,
                    mode="floor", factor=1, wm=0, hm=0, background="white",
                    mpmax=30, quality=100, optimize=True):
     """
-    Extracts image file paths from moodle portfolio export.
+    Extracts images from moodle portfolio export and combines them to create
+    a contact sheet.
     """
     # get the first html file in the directory
     try:
@@ -103,7 +106,7 @@ def extract_images(inputdir, outputfile, placeholder,
             img_set = [verify_img(sanitize(os.path.join(inputdir, img)),
                                   placeholder) for img in img_set]
             image_sets.append(tuple(img_set))
-    
+
     # create temporary directory
     tempdir = sanitize(os.path.join(inputdir,
                                     ".__tempcontactsheet"))
@@ -114,11 +117,13 @@ def extract_images(inputdir, outputfile, placeholder,
         if len(img_set) == 1:
             preprocessed_set.append(img_set[0])
         else:
-            log.prog("Preprocessing image set {0} / {1}".format(
-                                                           i, len(image_sets)))
+            log.prog("Preprocessing image set {0} / {1} ({2} %)".format(
+                                i + 1,
+                                len(image_sets),
+                                math.floor(((i + 1) / len(image_sets)) * 100)))
             sfn = "tempsheet_{0}.jpg".format(str(i).zfill(
                                                     len(str(len(image_sets)))))
-            sheetfile =  sanitize(os.path.join(tempdir, sfn))
+            sheetfile = sanitize(os.path.join(tempdir, sfn))
             sheet = contactsheet.create_tiled_image(img_set,
                                                     mode=mode,
                                                     factor=factor,
@@ -140,5 +145,61 @@ def extract_images(inputdir, outputfile, placeholder,
                               quality=quality,
                               optimize=optimize)
     shutil.rmtree(tempdir)
-    log.info("Contact sheet successfully created!")
+    log.info("Contact sheet {0} successfully created!".format(
+                                                 os.path.basename(outputfile)))
+    return outputfile
+
+
+def extract_pdfs(inputdir, outputfile, placeholder,
+                 mode="floor", factor=1, wm=0, hm=0, background="white",
+                 mpmax=30, quality=100, optimize=True):
+    """
+    Extracts PDFs from a moodle task export and combines them to create
+    a contact sheet. PDFs will be converted to images first.
+    """
+    # collect image paths as sets per <div> tag in the html file
+    log.write("--------------------------------------------------------------")
+    log.info("Extracting PDFs for {0} ... ".format(inputdir))
+
+    # get the first pdf file in the directory
+    pdfs = []
+    try:
+        contents = [os.path.join(inputdir, d)
+                    for d in os.listdir(inputdir)]
+        for p in contents:
+            # check if path is a directory or pdf file and append to list
+            if os.path.isdir(p):
+                pdf = glob.glob(sanitize(os.path.join(p, "*.pdf")))[0]
+                pdfs.append(pdf)
+            elif os.path.isfile(p) and p.endswith(".pdf"):
+                pdfs.append(pdf)
+    except IndexError:
+        log.warn("No PDF file found in directory! Aborting...")
+        return
+
+    images = []
+    for i, pdf in enumerate(pdfs):
+        log.prog("Preprocessing PDF {0} / {1} ({2} %)".format(
+                                    i + 1,
+                                    len(pdfs),
+                                    math.floor(((i + 1) / len(pdfs)) * 100)))
+        pdfpages = pdf2image.convert_from_path(pdf)
+        if len(pdfpages) > 1:
+            log.warn(("PDF {0} has more than one page! Only first page "
+                      "will be used!").format(pdf[-40:]))
+        images.append(pdfpages[0])
+
+    log.info("Creating contact sheet {0}...".format(outputfile))
+    sheet = contactsheet.create_tiled_image(images,
+                                            mode=mode,
+                                            factor=factor,
+                                            wm=wm,
+                                            hm=hm,
+                                            background=background,
+                                            mpmax=mpmax)
+    sheet.convert("RGB").save(sanitize(outputfile),
+                              quality=quality,
+                              optimize=optimize)
+    log.info("Contact sheet {0} successfully created!".format(
+                                                 os.path.basename(outputfile)))
     return outputfile

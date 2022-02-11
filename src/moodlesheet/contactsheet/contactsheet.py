@@ -1,7 +1,7 @@
 # Based on contactsheet
 #
 # Original Script Copyright (c) 2018, Paul Butcher
-# 
+#
 # https://github.com/paul-butcher/contactsheet
 # MIT license
 #
@@ -15,51 +15,80 @@ from statistics import mean
 
 # THIRD PARTY LIBRARY IMPORTS -------------------------------------------------
 
-from PIL import Image, ImageOps
+from PIL import Image, ImageFile
 
 
-def create_tiled_image(image_paths, mode="original",
+# FUNCTION DEFINITIONS --------------------------------------------------------
+
+def _get_image_object(path_or_image):
+    """
+    Returns the image as an image object, regardless if a path or an object
+    is supplied
+    """
+    if isinstance(path_or_image, Image.Image):
+        return path_or_image
+    if isinstance(path_or_image, ImageFile.ImageFile):
+        return Image.Image(path_or_image)
+    return Image.open(path_or_image)
+
+
+def _get_image_objects(paths_or_images):
+    """
+    Returns the images as image objects, regardless if a path or an object
+    is supplied
+    """
+    return [_get_image_object(o) for o in paths_or_images]
+
+
+def _get_image_sizes(images):
+    """
+    Returns all sizes of the supplied images.
+    """
+    return [img.size for img in _get_image_objects(images)]
+
+
+def create_tiled_image(images, mode="original",
                        factor=0.0, wm=0, hm=0, center=True,
                        background="black",
                        mpmax=30):
     """
     Create a tiled image from the list of image paths.
     """
-    image_count = len(image_paths)
+    image_count = len(images)
     if image_count == 0:
         return Image.new("RGB", (1, 1), "black")
     grid_size = get_grid_size(image_count)
+    sizes = _get_image_sizes(images)
     if mode == "average":
         # takes average image size in collection as tile size
-        sizes = [Image.open(img).size for img in image_paths]
         image_size = (int(math.floor(mean([s[0] for s in sizes]))),
                       int(math.floor(mean([s[1] for s in sizes]))))
     elif mode == "floor":
         # takes smallest image size in collection as tile size
-        sizes = [Image.open(img).size for img in image_paths]
         image_size = (int(math.floor(min([s[0] for s in sizes]))),
                       int(math.floor(min([s[1] for s in sizes]))))
-        # takes first image size in collection as tile size
     else:
-        image_size = Image.open(image_paths[0]).size
+        # takes first image size in collection as tile size
+        image_size = sizes[0]
+    # ocmpute tile size and final size
     tile_size, output_size = get_tiled_image_dimensions(grid_size,
                                                         image_size,
                                                         factor=factor,
                                                         wm=wm,
                                                         hm=hm,
                                                         mpmax=mpmax)
-    
+    # create final image object
     final_image = Image.new("RGB", output_size, background)
-
-    for i, image_path in enumerate(image_paths):
+    # insert tiles into grid
+    for i, image in enumerate(images):
         insert_image_into_grid(final_image,
                                tile_size,
-                               image_path,
+                               _get_image_object(image),
                                get_location_in_grid(grid_size, i),
                                center=center,
                                wm=wm,
                                hm=hm)
-
+    # return result
     return final_image
 
 
@@ -143,7 +172,7 @@ def get_tiled_image_dimensions(grid_size, image_size, factor=0.0, wm=0, hm=0,
     return (tile_width, tile_height), (final_width, final_height)
 
 
-def insert_image_into_grid(final_image, tile_size, image_path, location,
+def insert_image_into_grid(final_image, tile_size, image, location,
                            wm=0, hm=0, center=True):
     """
     Given a PIL image object - `final_image`, insert the image found at
@@ -151,22 +180,21 @@ def insert_image_into_grid(final_image, tile_size, image_path, location,
     location is defined as the 2d location in a grid of images
     (see get_location_in_grid)
     """
-    input_image = Image.open(image_path)
-    input_image.thumbnail(tile_size)
+    image.thumbnail(tile_size)
     # get width and height from thumbnailed image
-    width, height = input_image.size
+    width, height = image.size
     # compute addition to with and height to center the
     # inserted image in the tile
     wadd = 0
     hadd = 0
     if center:
-        wadd += int(math.floor((tile_size[0] - width) / 2)) 
+        wadd += int(math.floor((tile_size[0] - width) / 2))
         hadd += int(math.floor((tile_size[1] - height) / 2))
     # compute x and y location of image insertion
     x = (tile_size[0] * location[0]) + (wm * location[0]) + wm + wadd
     y = (tile_size[1] * location[1]) + (hm * location[1]) + hm + hadd
     # insert image
-    final_image.paste(input_image, (x, y))
+    final_image.paste(image, (x, y))
     # return result
     return final_image
 

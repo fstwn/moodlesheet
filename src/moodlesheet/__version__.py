@@ -1,7 +1,7 @@
 __title__ = "moodlesheet"
 __description__ = ("Generate contact sheet images from moodle portfolios.")
 __url__ = ""
-__version__ = "0.0.1.0"
+__version__ = "0.0.2.0"
 __author__ = "Max Eschenbach"
 __author_email__ = "eschenbach@dg.tu-darmstadt.de"
 __license__ = "MIT License"
