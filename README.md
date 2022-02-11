@@ -1,4 +1,4 @@
-# Compiling moodle portfolios to contact sheet images
+# Create contact sheets from moodle portfolios
 
 ## About
 
