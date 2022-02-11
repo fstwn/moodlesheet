@@ -10,4 +10,4 @@ from .__version__ import (__author__, __author_email__, __copyright__,
 
 # PACKAGE MODULE IMPORTS ------------------------------------------------------
 
-from moodlesheet.image_extraction import extract_images, sanitize
+from moodlesheet.extract import extract_images, sanitize

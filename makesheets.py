@@ -50,4 +50,16 @@ if __name__ == "__main__":
     for p in portfolios:
         fn = os.path.basename(os.path.normpath(p)) + ".jpg"
         outfile = os.path.join(OUTPUT_DIR, fn)
-        extract_images(p, outfile, PLACEHOLDER)
+        # settings
+        mode = "floor"
+        factor = 1
+        width_margin = 10
+        height_margin = 10
+        background = "white"
+        
+        extract_images(p, outfile, PLACEHOLDER,
+                       mode=mode,
+                       factor=factor,
+                       wm=width_margin,
+                       hm=height_margin,
+                       background=background)
