@@ -11,6 +11,7 @@ import sys
 
 import bs4
 import pdf2image
+from pdf2image.exceptions import PDFPageCountError
 
 
 # LOCAL MODULE IMPORTS --------------------------------------------------------
@@ -163,19 +164,30 @@ def extract_pdfs(inputdir, outputfile, placeholder,
 
     # get the first pdf file in the directory
     pdfs = []
-    try:
-        contents = [os.path.join(inputdir, d)
-                    for d in os.listdir(inputdir)]
-        for p in contents:
-            # check if path is a directory or pdf file and append to list
-            if os.path.isdir(p):
+
+    # contents = all sub folders
+    contents = [os.path.join(inputdir, d)
+                for d in os.listdir(inputdir)]
+
+    # for every path in contents
+    for p in contents:
+        # check if path is a directory or pdf file and append to list
+        if os.path.isdir(p):
+            try:
                 pdf = glob.glob(sanitize(os.path.join(p, "*.pdf")))[0]
                 pdfs.append(pdf)
-            elif os.path.isfile(p) and p.endswith(".pdf"):
-                pdfs.append(pdf)
-    except IndexError:
-        log.warn("No PDF file found in directory! Aborting...")
-        return
+            except IndexError:
+                log.warn("No PDF file found in directory! "
+                         "Checking for sub dir...")
+                try:
+                    pdf = glob.glob(sanitize(os.path.join(
+                                            p, os.listdir(p)[0], "*.pdf")))[0]
+                    pdfs.append(pdf)
+                except IndexError:
+                    log.warn("No PDF file found in sub directory! Skipping...")
+                    continue
+        elif os.path.isfile(p) and p.endswith(".pdf"):
+            pdfs.append(pdf)
 
     images = []
     for i, pdf in enumerate(pdfs):
@@ -183,11 +195,16 @@ def extract_pdfs(inputdir, outputfile, placeholder,
                                     i + 1,
                                     len(pdfs),
                                     math.floor(((i + 1) / len(pdfs)) * 100)))
-        pdfpages = pdf2image.convert_from_path(pdf)
-        if len(pdfpages) > 1:
-            log.warn(("PDF {0} has more than one page! Only first page "
-                      "will be used!").format(pdf[-40:]))
-        images.append(pdfpages[0])
+        # convert pdf to single images
+        try:
+            pdfpages = pdf2image.convert_from_path(pdf)
+            if len(pdfpages) > 1:
+                log.warn(("PDF {0} has more than one page! Only first page "
+                          "will be used!").format(pdf[-40:]))
+            images.append(pdfpages[0])
+        except PDFPageCountError:
+            log.warn("PDF file is corrupt! Skipping...")
+            continue
 
     log.info("Creating contact sheet {0}...".format(outputfile))
     sheet = contactsheet.create_tiled_image(images,
