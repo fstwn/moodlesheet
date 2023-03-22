@@ -8,6 +8,7 @@ import zipfile
 
 from moodlesheet import (extract_images,
                          extract_pdfs,
+                         extract_tiles,
                          sanitize)
 
 
@@ -48,7 +49,7 @@ if __name__ == "__main__":
     for p in contents:
         # check if path is a directory or file
         if os.path.isdir(p):
-            # add as portfoli dir if a directory
+            # add as portfolio dir if a directory
             portfolios.append(p)
         # else check if it's a .zip archive and extract the contents
         elif zipfile.is_zipfile(p):
@@ -101,7 +102,7 @@ if __name__ == "__main__":
                     zipobj.extractall(exdir)
             pdf_maindirs.append(exdir)
 
-    # loop over all portfolios an extract images into contact sheet
+    # loop over all portfolios and extract images into contact sheet
     for p in pdf_maindirs:
         fn = os.path.basename(os.path.normpath(p)) + ".jpg"
         outfile = os.path.join(OUTPUT_DIR, fn)
@@ -115,3 +116,43 @@ if __name__ == "__main__":
                      mpmax=mpmax,
                      quality=quality,
                      optimize=optimize)
+
+    # PORTFOLIO TILES CONTACT SHEETS -----------------------------------------
+
+    # declare input directory for portfolio exports
+    INPUT_PORTFOLIO_TILES = sanitize(os.path.join(HERE, "input_tiles"))
+
+    # gather contents, unzip files if necessary
+    contents = [os.path.join(INPUT_PORTFOLIO_TILES, d)
+                for d in os.listdir(INPUT_PORTFOLIO_TILES)]
+    portfolios = []
+    for p in contents:
+        # check if path is a directory or file
+        if os.path.isdir(p):
+            # add as portfolio dir if a directory
+            portfolios.append(p)
+        # else check if it's a .zip archive and extract the contents
+        elif zipfile.is_zipfile(p):
+            # remove .zip file ending from path
+            exdir = p[:-4]
+            # only if folder with the same name does not exist yet
+            if not os.path.isdir(exdir):
+                os.makedirs(exdir)
+                with zipfile.ZipFile(p, "r") as zipobj:
+                    zipobj.extractall(exdir)
+            portfolios.append(exdir)
+
+    # loop over all portfolios an extract images into contact sheet
+    for p in portfolios:
+        fn = os.path.basename(os.path.normpath(p)) + ".jpg"
+        outfile = os.path.join(OUTPUT_DIR, fn)
+
+        extract_tiles(p, outfile, PLACEHOLDER,
+                      mode=mode,
+                      factor=factor,
+                      wm=width_margin,
+                      hm=height_margin,
+                      background=background,
+                      mpmax=mpmax,
+                      quality=quality,
+                      optimize=optimize)

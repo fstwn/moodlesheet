@@ -203,3 +203,52 @@ def extract_pdfs(inputdir, outputfile, placeholder,
     log.info("Contact sheet {0} successfully created!".format(
                                                  os.path.basename(outputfile)))
     return outputfile
+
+
+def extract_tiles(inputdir, outputfile, placeholder,
+                  mode="floor", factor=1, wm=0, hm=0, background="white",
+                  mpmax=30, quality=100, optimize=True):
+    """
+    Extracts images from moodle portfolio export and combines them to create
+    a contact sheet.
+    """
+    # get the first html file in the directory
+    try:
+        filepath = glob.glob(sanitize(os.path.join(inputdir, "*.html")))[0]
+    except IndexError:
+        log.warn("No HTML file found in portfolio dir! Aborting...")
+        return
+    # init list for image paths
+    tile_set = []
+    # collect image paths as sets per <div> tag in the html file
+    log.write("--------------------------------------------------------------")
+    log.info("Extracting images for {0} ... ".format(inputdir))
+    with open(filepath, "r") as f:
+        # parse file using beautifulsoup
+        soup = bs4.BeautifulSoup(f, "html.parser")
+        # extract all divs from the file
+        divs = soup.find_all("div")
+        log.info("{0} entries found...".format(len(divs)))
+        # loop over all divs
+        for i, div in enumerate(divs):
+            tile = [img["src"] for img in div.find_all("img")][0]
+            tile = verify_img(sanitize(os.path.join(inputdir, tile)),
+                              placeholder)
+            tile_set.append(tile)
+
+    # specify output file
+    log.info("Creating contact sheet {0}...".format(outputfile))
+
+    sheet = contactsheet.create_tiled_image(tile_set,
+                                            mode=mode,
+                                            factor=factor,
+                                            wm=wm,
+                                            hm=hm,
+                                            background=background,
+                                            mpmax=mpmax)
+    sheet.convert("RGB").save(sanitize(outputfile),
+                              quality=quality,
+                              optimize=optimize)
+    log.info("Contact sheet {0} successfully created!".format(
+                                                 os.path.basename(outputfile)))
+    return outputfile

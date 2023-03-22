@@ -11,11 +11,13 @@ from .__version__ import (__author__, __author_email__, __copyright__,
 
 from moodlesheet.extract import (extract_images,
                                  extract_pdfs,
+                                 extract_tiles,
                                  sanitize)
 
 __all__ = [
     "extract_images",
     "extract_pdfs",
+    "extract_tiles",
     "sanitize",
     "__author__", "__author_email__", "__copyright__", "__description__",
     "__license__", "__title__", "__url__", "__version__",

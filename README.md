@@ -30,10 +30,10 @@ pip install -e .
 
 ## 3. Export the moodle gallery as a portfolio (HTML with attachments)
 
-Export the moodle gallery as a portfolio (HTML with attachments). You should get
-a `portfolio-export.zip` file. Rename this into something useful, .e.g.
-`b322_2021_aufgabe01.zip` and place it into the `input` directory. Your
-folder structure should then be something like this:
+Export the moodle gallery as a portfolio (HTML with attachments). You should
+get a `portfolio-export.zip` file. Rename this into something useful, .e.g.
+`b322_2021_aufgabe01.zip` and place it into the `input_portfolio` directory.
+Your folder structure should then be something like this:
 
 ```
 moodlesheet/

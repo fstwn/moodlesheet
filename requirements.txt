@@ -2,3 +2,4 @@ beautifulsoup4
 pillow
 pdf2image
 setuptools
+-e .

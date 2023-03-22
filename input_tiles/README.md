@@ -1,0 +1,1 @@
+### input directory for `makesheets.py`. Put .zip's containing a moodle portfolio export (i.e. from an image gallery) here. The tiles workflow will only take the tile image and ignore the reference image!
