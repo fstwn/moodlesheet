@@ -15,6 +15,8 @@ __pycache__/
 # MISC
 input_portfolio/*/
 input_portfolio/*.zip
+input_tiles/*/
+input_tiles/*.zip
 input_pdf/*/
 input_pdf/*.zip
 output/*.jpg
