@@ -20,6 +20,7 @@ input_tiles/*.zip
 input_pdf/*/
 input_pdf/*.zip
 output/*.jpg
+output/*/
 _archive
 moodlesheet.code-workspace
 *.egg-info
