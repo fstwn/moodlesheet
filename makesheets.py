@@ -1,5 +1,6 @@
 # PYTHON STANDARD LIBRARY IMPORTS ---------------------------------------------
 
+from datetime import datetime
 import os
 import zipfile
 
@@ -24,8 +25,14 @@ PLACEHOLDER = sanitize(os.path.join(HERE, "resources/placeholder.jpg"))
 # SCRIPT ----------------------------------------------------------------------
 
 if __name__ == "__main__":
+    # create timestamp for directory name
+    timestamp = datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
+    
     # declare output directory
-    OUTPUT_DIR = sanitize(os.path.join(HERE, "output"))
+    OUTPUT_DIR = sanitize(os.path.join(HERE, "output", timestamp))
+
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
 
     # settings
     mode = "average"
